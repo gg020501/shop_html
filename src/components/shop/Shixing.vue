@@ -132,7 +132,6 @@
       },methods:{
         toadd:function() {
           this.addFormFlag = true;
-
         },addShopData:function () {
             ajax.post("http://127.0.0.1:8080/api/shuxing/insertshuxing",qs.stringify(this.addForm)).then(rs=>{
               if(rs.data.code == 200){

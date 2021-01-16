@@ -76,6 +76,7 @@ export default {
                     index: 'Shixing',
                     title: '属性管理'
                   }
+
                 ]
               },
                 {

@@ -35,6 +35,7 @@ export default new Router({
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Shixing.vue'),
           meta: { title: '属性管理' }
         }
+
       ]
     }
   ]
