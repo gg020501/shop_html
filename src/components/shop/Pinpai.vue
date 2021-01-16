@@ -184,13 +184,13 @@
             var start = this.start;
             var size = this.size;
             var pinpaiData = this;
-            ajax.post("http://192.168.1.1:8080/api/pinpai/selectpinpaiAll?start="+start+"&size="+size,qs.stringify(data)).then(rs=>{
+            ajax.post("http://127.0.0.1:8080/api/pinpai/selectpinpaiAll?start="+start+"&size="+size,qs.stringify(data)).then(rs=>{
               pinpaiData.pinpaiData = rs.data.data;
               pinpaiData.count = rs.data.count;
               pinpaiData.totalPage = Math.ceil(pinpaiData.count/size);
             });
           },del:function (pinpai) {
-              ajax.post("http://192.168.1.1:8080/api/pinpai/delectpinpaiById?id="+pinpai.id).then(rs=>{
+              ajax.post("http://127.0.0.1:8080/api/pinpai/delectpinpaiById?id="+pinpai.id).then(rs=>{
                 if(rs.data.code == 200){
                   this.$message({
                     type: 'success',
@@ -207,7 +207,7 @@
               this.updBandForm.imgpath=response.filePath;
           },addForm:function () {
               var stringify = qs.stringify(this.saveBandForm);
-              ajax.post("http://192.168.1.1:8080/api/pinpai/selectpinpaiInsert",stringify).then(rs=>{
+              ajax.post("http://127.0.0.1:8080/api/pinpai/selectpinpaiInsert",stringify).then(rs=>{
                 if(rs.data.code == 200){
                   this.$message({
                     type: 'success',
@@ -227,7 +227,7 @@
                 this.updBandForm.author = pinpai.author;
           },updForm:function () {
               var stringify = qs.stringify(this.updBandForm);
-                ajax.post("http://192.168.1.1:8080/api/pinpai/selectpinpaiInsert",stringify).then(rs=>{
+                ajax.post("http://127.0.0.1:8080/api/pinpai/selectpinpaiInsert",stringify).then(rs=>{
                   if(rs.data.code == 200){
                     this.$message({
                       type: 'success',

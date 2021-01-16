@@ -30,6 +30,10 @@ export default new Router({
           path: '/Pinpai',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Pinpai.vue'),
           meta: { title: '品牌管理' }
+        },{
+          path: '/Shixing',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Shixing.vue'),
+          meta: { title: '属性管理' }
         }
       ]
     }

@@ -137,7 +137,7 @@
                         cancelButtonText: '取消',
                         type: 'warning'
                       }).then(()=>{
-                          ajax.post("http://192.168.1.1:8080/api/stype/stypeDeleteId?id="+node.id).then(rs=>{
+                          ajax.post("http://127.0.0.1:8080/api/stype/stypeDeleteId?id="+node.id).then(rs=>{
                               if(rs.data.code == 200){
                                 this.$message({
                                   type: 'success',
@@ -156,7 +156,7 @@
                   console.log(data.id);
                   debugger
             },add:function () {
-                ajax.post("http://192.168.1.1:8080/api/stype/selectstypeInsert",qs.stringify(this.form)).then(rs=>{
+                ajax.post("http://127.0.0.1:8080/api/stype/selectstypeInsert",qs.stringify(this.form)).then(rs=>{
                   if(rs.data.code == 200){
                     this.dialogFormVisible = false;
                     this.$message({
@@ -170,7 +170,7 @@
                   this.upd.name = data.label;
                   this.upd.id = data.id;
             },updtree:function () {
-                ajax.post("http://192.168.1.1:8080/api/stype/selectstypeInsert",qs.stringify(this.upd)).then(rs=>{
+                ajax.post("http://127.0.0.1:8080/api/stype/selectstypeInsert",qs.stringify(this.upd)).then(rs=>{
                   if(rs.data.code == 200){
                     this.dialogFormupdVisible = false;
                     this.$message({
@@ -181,7 +181,7 @@
                 })
             }
       },created:function(){
-           ajax.get("http://192.168.1.1:8080/api/stype/selectstypeAll").then(rs=>{
+           ajax.get("http://127.0.0.1:8080/api/stype/selectstypeAll").then(rs=>{
             this.nodeData = rs.data.data;
             this.chandleData();
             console.log(this.nodeData);
