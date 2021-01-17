@@ -27,7 +27,7 @@
 
         <el-table-column  prop="imgpath" label="图片log" width="160">
           <template slot-scope="scope" >
-            <img width="50px" :src="'http://localhost:8080/ '+scope.row.imgpath"/>
+            <img width="50px" :src="scope.row.imgpath"/>
           </template>
         </el-table-column>
 
@@ -68,7 +68,7 @@
         <el-form-item label="图片">
           <el-upload
             class="upload-demo"
-            action="http://192.168.1.1:8080/api/pinpai/insertimgpath"
+            action="http://127.0.0.1:8080/api/pinpai/insertimgpath"
             :on-success="imgCallBack"
             name="file"
             list-type="picture">
@@ -110,11 +110,11 @@
         <el-form-item label="图片">
           <el-upload
             class="upload-demo"
-            action="http://192.168.1.1:8080/api/pinpai/insertimgpath"
+            action="http://127.0.0.1:8080/api/pinpai/insertimgpath"
             :on-success="imgCallBack2"
             name="file"
             list-type="picture">
-            <img width="50px"  :src="'http://localhost:8080/'+updBandForm.imgpath" />
+            <img width="50px"  :src="updBandForm.imgpath" />
             <el-button size="small" type="primary">点击上传</el-button>
           </el-upload>
         </el-form-item>
@@ -201,10 +201,11 @@
               });
           },add:function () {
               this.addFormFlag = true;
-          },imgCallBack:function (response, file, fileList) {
-              this.saveBandForm.imgpath=response.filePath;
-          },imgCallBack2:function (response, file, fileList) {
-              this.updBandForm.imgpath=response.filePath;
+          },imgCallBack:function (response, file) {
+            debugger
+              this.saveBandForm.imgpath=response.data;
+          },imgCallBack2:function (response, file) {
+              this.updBandForm.imgpath=response.data;
           },addForm:function () {
               var stringify = qs.stringify(this.saveBandForm);
               ajax.post("http://127.0.0.1:8080/api/pinpai/selectpinpaiInsert",stringify).then(rs=>{
@@ -225,6 +226,7 @@
                 this.updBandForm.banddesc = pinpai.banddesc;
                 this.updBandForm.ord = pinpai.ord;
                 this.updBandForm.author = pinpai.author;
+                this.updBandForm.imgpath = pinpai.imgpath;
           },updForm:function () {
               var stringify = qs.stringify(this.updBandForm);
                 ajax.post("http://127.0.0.1:8080/api/pinpai/selectpinpaiInsert",stringify).then(rs=>{
@@ -238,9 +240,6 @@
                   this.updFormFlag = false;
                 })
           }
-
-
-
       }
   }
 </script>
