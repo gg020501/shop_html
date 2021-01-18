@@ -3,7 +3,7 @@
 
 
     <!--属性value-->
-    <el-dialog title="属性值信息" :visible.sync="sxFormFlag">
+    <el-dialog :title="shuxingtitle" :visible.sync="sxFormFlag">
       <el-button type="success" @click="toaddvalue">新增</el-button>
       <el-table
         :data="sxvalueData"
@@ -35,8 +35,8 @@
           prop="id"
           label="操作">
           <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-edit"   @click="toupdatevalue(scope.row)"></el-button>
-            <el-button type="danger" icon="el-icon-delete"  @click="delvalueId(scope.row.id)"></el-button>
+            <el-button type="primary" icon="el-icon-edit" @click="toupdatevalue(scope.row)"></el-button>
+            <el-button type="danger" icon="el-icon-delete" @click="delvalueId(scope.row.id)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -45,13 +45,13 @@
 
     <el-dialog title="新增属性" :visible.sync="addShuXing">
 
-      <el-form :model="addSx" ref="addForm" label-width="100px">
+      <el-form :model="addSx" :rules="addFormsx" ref="addformshuxing" label-width="100px">
 
         <el-form-item label="属性英文名" prop="name">
           <el-input v-model="addSx.name" autocomplete="off" ></el-input>
         </el-form-item>
 
-        <el-form-item label="属性中文名" prop="nameCH">
+        <el-form-item label="属性中文名" prop="namech">
           <el-input v-model="addSx.namech" autocomplete="off" ></el-input>
         </el-form-item>
 
@@ -64,13 +64,13 @@
 
     <el-dialog title="修改属性" :visible.sync="updShuXing">
 
-      <el-form :model="updSx" ref="addForm" label-width="100px">
+      <el-form :model="updSx" :rules="addFormsx" ref="addformshuxing" label-width="100px">
 
         <el-form-item label="属性英文名" prop="name">
           <el-input v-model="updSx.name" autocomplete="off" ></el-input>
         </el-form-item>
 
-        <el-form-item label="属性中文名" prop="nameCH">
+        <el-form-item label="属性中文名" prop="namech">
           <el-input v-model="updSx.namech" autocomplete="off" ></el-input>
         </el-form-item>
 
@@ -132,7 +132,7 @@
         <template slot-scope="scope">
           <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
           <el-button type="danger" icon="el-icon-delete"  @click="del(scope.row.id)"></el-button>
-          <el-button type="success" @click="weihuvalue(scope.row)">维护信息</el-button>
+          <el-button type="success" v-if="scope.row.type != 3" @click="weihuvalue(scope.row)">维护信息</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -145,20 +145,20 @@
     <!--新增模板-->
     <el-dialog title="品牌信息" :visible.sync="addFormFlag">
 
-      <el-form :model="addForm" ref="addForm" label-width="100px">
+      <el-form :model="addForm" :rules="addrules" ref="valueform" label-width="100px">
 
-        <el-form-item label="属性英文名" prop="name">
+        <el-form-item label="属性中文名" prop="name">
           <el-input v-model="addForm.name" autocomplete="off" ></el-input>
         </el-form-item>
 
-        <el-form-item label="属性中文名" prop="nameCH">
+        <el-form-item label="属性英文名" prop="namech">
           <el-input v-model="addForm.namech" autocomplete="off" ></el-input>
         </el-form-item>
 
-       <el-form-item label="商品类型" prop="typeId">
+       <el-form-item label="商品类型" prop="typeid">
           <el-select v-model="addForm.typeid" placeholder="请选择">
             <el-option
-              v-for="item in bandData"
+              v-for="item in types"
               :key="item.id"
               :label="item.name"
               :value="item.id">
@@ -173,7 +173,7 @@
           <el-radio v-model="addForm.type" :label="3">输入框</el-radio>
         </el-form-item>
 
-        <el-form-item label="是否为SKU" prop="isSKU">
+        <el-form-item label="是否为SKU" prop="issku">
           <el-radio v-model="addForm.issku" :label="0">是</el-radio>
           <el-radio v-model="addForm.issku" :label="1">否</el-radio>
         </el-form-item>
@@ -186,7 +186,7 @@
     </el-dialog>
 
 
-    <!--新增模板-->
+    <!--修改模板-->
     <el-dialog title="修改品牌信息" :visible.sync="updFormFlag">
 
       <el-form :model="updForm" ref="addForm" label-width="100px">
@@ -201,7 +201,7 @@
 
         <el-form-item label="商品类型" prop="typeId">
           <el-select v-model="updForm.typeid" placeholder="请选择">
-            <el-option v-for="item in bandData" :key="item.id" :label="item.name" :value="item.id">
+            <el-option v-for="item in types" :key="item.id" :label="item.name" :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
@@ -234,12 +234,36 @@
     export default {
         name: "Shixing",
       data(){
+        var checkname = (rule, value, callback) => {
+          if (!value) {
+            return callback(new Error('属性名不能为空'));
+          }
+          if(/^[\u4e00-\u9fa5]+$/i.test(value)){
+            callback();
+          }else{
+            callback(new Error('只能输入中文'));
+          }
+        };
+        var checknamech = (rule, value, callback) => {
+          if (!value) {
+            return callback(new Error('属性名不能为空'));
+          }
+          if(/^[A-Za-z]+$/i.test(value)){
+            callback();
+          }else{
+            callback(new Error('只能输入英文'));
+          }
+        };
           return{
+            shuxingtitle:"",
+            attid:'',
             name:'',
             sxvalueData:[],
-            bandData:[],
+            //digui
+            types:[],
             typeData:[],
-            arr:'',
+            typeName:'',
+            //digui
             ShuxingData:[],
             count:0,
             start:1,
@@ -252,6 +276,7 @@
             addShuXing:false,
             updShuXing:false,
             updForm:{
+              id:"",
               name:"",
               namech:"",
               typeid:"",
@@ -263,14 +288,46 @@
               typeid:"",
               type:"",
               issku:""
+            },addrules:{
+              name:[
+                { required: true, message: '请输入属性英文名', trigger: 'blur' },
+                { min: 3, max: 7, message: '长度在 3 到 7 个字符', trigger: 'blur' }
+              ],
+              namech:[
+                { required: true, message: '请输入属性中文名', trigger: 'blur' },
+                { min: 3, max: 7, message: '长度在 3 到 7 个字符', trigger: 'blur' }
+              ],
+              typeid:[
+                { required: true, message: '请选择商品类型', trigger: 'change' }
+              ],
+              type:[
+                { required: true, message: '请选择属性类型', trigger: 'change' }
+              ],
+              issku:[
+                { required: true, message: '请选择是否为sku', trigger: 'change' }
+              ]
+
             },addSx:{
               name:"",
               namech:"",
               attid:""
+            },addFormsx:{
+              name:[
+                { required: true, message: '请输入属性值的名称', trigger: 'blur' },
+                { max: 10, message: '长度不能超过 10 个字符', trigger: 'blur' },
+                { validator:checknamech,trigger: 'blur' }
+              ],
+              namech:[
+                { required: true, message: '请输入属性值的名称', trigger: 'blur' },
+                { max: 10, message: '长度不能超过 10 个字符', trigger: 'blur' },
+                { validator:checkname,trigger: 'blur' }
+              ]
             },updSx:{
-              name:"",
-              namech:"",
-              attid:""
+              attid:"",
+              id:"",
+              isdel:"",
+              name: "",
+              namech: ""
             }
           }
       },created:function(){
@@ -279,18 +336,22 @@
       },methods:{
         toadd:function() {
           this.addFormFlag = true;
-
         },addShopData:function () {
-            ajax.post("http://127.0.0.1:8080/api/shuxing/insertshuxing",qs.stringify(this.addForm)).then(rs=>{
-              if(rs.data.code == 200){
-                this.$message({
-                  type: 'success',
-                  message: '新增成功!'
-                });
-                this.selectshuxingAll();
-              }
-              this.addFormFlag = false;
-            });
+            this.$refs['valueform'].validate((valib)=>{
+                if(valib == true){
+                  ajax.post("http://127.0.0.1:8080/api/shuxing/insertshuxing",qs.stringify(this.addForm)).then(rs=>{
+                    if(rs.data.code == 200){
+                      this.$message({
+                        type: 'success',
+                        message: '新增成功!'
+                      });
+                      this.selectshuxingAll();
+                    }
+                    this.addFormFlag = false;
+                  });
+                }
+            })
+
         },selectshuxingAll:function (page) {
             var data = {page:page,name:this.name}
             var size = this.size;
@@ -321,52 +382,63 @@
             }
           }
           return "";
-        },diguiNode: function (node) {
-          // 判断是否为父节点
-          var bf = this.isParent(node);
-          if (bf == true) {
-            for (let i = 0; i < this.typeData.length; i++) {
-              //判断是否为当前节点的子节点
-              if (node.id == this.typeData[i].pid) {
-                this.diguiNode(this.typeData[i]);
-              }
-            }
-          }
-          if (bf == false) {
-            for (let i = 0; i <this.typeData.length ; i++) {
-              if(node.pid==this.typeData[i].id){
-                this.arr='{"id":'+node.id+',"name":'+'"分类/'+this.typeData[i].name+"/"+node.name+'"'+'}';
-                this.bandData.push(JSON.parse(this.arr))
-              }
-            }
-          }
-        },isParent: function (node) {// 判断是否为父节点  pid 有没有指向当前id
-          for (let i = 0; i < this.typeData.length; i++) {
-            if (node.id == this.typeData[i].pid) {
-              return true;
-            }
-          }
-          return false;
         },queryType:function () {
-          var typeData = this;
-          ajax.get("http://127.0.0.1:8080/api/stype/selectstypeAll").then(rs=>{
-            typeData.typeData = rs.data.data;
-            for (let i = 0; i < rs.data.data.length; i++) {
-              if (rs.data.data[i].pid ==0) {
-                this.diguiNode(rs.data.data[i]);
+            ajax.get("http://127.0.0.1:8080/api/stype/selectstypeAll").then(rs=>{
+              this.typeData = rs.data.data;
+              //先找到子节点的数据   this.types;
+              this.getChildrenType();
+              for (let i = 0; i <this.types.length ; i++) {
+                this.typeName = "";
+                this.chandleName(this.types[i]);
+                console.log(this.types);
+                var typeName1 = this.typeName.split("/").reverse().join("/");
+                debugger
+                this.types[i].name= typeName1.substr(0,typeName1.length-1);
+              }
+            });
+          },chandleName:function (node) {
+              if(node.pid != 0){
+                this.typeName+="/"+node.name;
+                for (let i = 0; i <this.typeData.length ; i++) {
+                  if(node.pid == this.typeData[i].id){
+                    this.chandleName(this.typeData[i]);
+                    break;
+                  }
+                }
+              }else{
+                this.typeName+="/"+node.name;
+              }
+          },getChildrenType:function () {
+            for (let i = 0; i <this.typeData.length ; i++) {
+              let  node=this.typeData[i];
+              this.isChildrenNode(node);
+            }
+          },isChildrenNode:function (node) {
+            let rs = true;
+            for (let i = 0; i <this.typeData.length ; i++) {
+              if(node.id == this.typeData[i].pid ){
+                rs = false;
                 break;
               }
             }
-          });
-        },toupdate:function (sx) {
+            if(rs==true){
+              this.types.push(node);
+            }
+          },toupdate:function (sx) {
             this.updFormFlag = true;
             this.updForm = sx;
 
-        },weihuvalue:function (sx) {
+        },weihuvalue:function (row) {
+            this.updForm = row;
             this.sxFormFlag = true;
-            this.addSx.attid = sx.id;
+            debugger
+            for (let i = 0; i <this.typeData.length ; i++) {
+              if(row.typeid == this.typeData[i].id){
+                this.shuxingtitle = this.typeData[i].name+"信息维护";
+              }
+            }
             var sxvalueData = this;
-            ajax.post("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalue?id="+sx.id).then(rs=>{
+            ajax.post("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalue?id="+this.updForm.id).then(rs=>{
               sxvalueData.sxvalueData = rs.data.data;
             });
         },delvalueId:function (id) {
@@ -376,6 +448,7 @@
                 type: 'success',
                 message: '删除成功!'
               });
+              this.weihuvalue(this.updForm);
             }
           });
         },toupdatevalue:function (sx) {
@@ -384,12 +457,19 @@
         },toaddvalue:function () {
             this.addShuXing = true;
         },submitSx:function () {
-          ajax.post("http://127.0.0.1:8080/api/shuxingvalue/insertsxvalue",qs.stringify(this.addSx)).then(rs=>{
-            if(rs.data.code == 200){
-              this.$message({
-                type: 'success',
-                message: '新增成功!'
-              });
+          this.addSx.attid=this.attid;
+          this.$refs['addformshuxing'].validate((valid)=>{
+            if(valid == true){
+              ajax.post("http://127.0.0.1:8080/api/shuxingvalue/insertsxvalue",qs.stringify(this.addSx)).then(rs=>{
+                if(rs.data.code == 200){
+                  this.$message({
+                    type: 'success',
+                    message: '新增成功!'
+                  });
+                  this.addShuXing = false;
+                  this.weihuvalue(this.updForm);
+                }
+              })
             }
           })
         },updateSx:function () {
@@ -399,6 +479,8 @@
                 type: 'success',
                 message: '修改成功!'
               });
+              this.updShuXing = false;
+              this.weihuvalue(this.updForm);
             }
           })
         },updShopData:function () {
@@ -413,6 +495,8 @@
             this.updFormFlag = false;
           });
         }
+
+
         
       }
     }
