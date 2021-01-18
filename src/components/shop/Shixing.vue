@@ -17,13 +17,13 @@
 
         <el-table-column
           prop="name"
-          label="名称"
+          label="英文名"
           width="180">
         </el-table-column>
 
         <el-table-column
           prop="namech"
-          label="英文名">
+          label="名称">
         </el-table-column>
 
         <el-table-column
@@ -47,11 +47,11 @@
 
       <el-form :model="addSx" :rules="addFormsx" ref="addformshuxing" label-width="100px">
 
-        <el-form-item label="属性英文名" prop="name">
+        <el-form-item label="属性中文名" prop="name">
           <el-input v-model="addSx.name" autocomplete="off" ></el-input>
         </el-form-item>
 
-        <el-form-item label="属性中文名" prop="namech">
+        <el-form-item label="属性英文名" prop="namech">
           <el-input v-model="addSx.namech" autocomplete="off" ></el-input>
         </el-form-item>
 
@@ -66,11 +66,11 @@
 
       <el-form :model="updSx" :rules="addFormsx" ref="addformshuxing" label-width="100px">
 
-        <el-form-item label="属性英文名" prop="name">
+        <el-form-item label="属性中文名" prop="name">
           <el-input v-model="updSx.name" autocomplete="off" ></el-input>
         </el-form-item>
 
-        <el-form-item label="属性中文名" prop="namech">
+        <el-form-item label="属性英文名" prop="namech">
           <el-input v-model="updSx.namech" autocomplete="off" ></el-input>
         </el-form-item>
 
@@ -143,7 +143,7 @@
     </font>
 
     <!--新增模板-->
-    <el-dialog title="品牌信息" :visible.sync="addFormFlag">
+    <el-dialog title="属性信息" :visible.sync="addFormFlag">
 
       <el-form :model="addForm" :rules="addrules" ref="valueform" label-width="100px">
 
@@ -187,7 +187,7 @@
 
 
     <!--修改模板-->
-    <el-dialog title="修改品牌信息" :visible.sync="updFormFlag">
+    <el-dialog title="修改属性信息" :visible.sync="updFormFlag">
 
       <el-form :model="updForm" ref="addForm" label-width="100px">
 
@@ -315,12 +315,12 @@
               name:[
                 { required: true, message: '请输入属性值的名称', trigger: 'blur' },
                 { max: 10, message: '长度不能超过 10 个字符', trigger: 'blur' },
-                { validator:checknamech,trigger: 'blur' }
+                { validator:checkname,trigger: 'blur' }
               ],
               namech:[
                 { required: true, message: '请输入属性值的名称', trigger: 'blur' },
                 { max: 10, message: '长度不能超过 10 个字符', trigger: 'blur' },
-                { validator:checkname,trigger: 'blur' }
+                { validator:checknamech,trigger: 'blur' }
               ]
             },updSx:{
               attid:"",
@@ -382,56 +382,61 @@
             }
           }
           return "";
-        },queryType:function () {
-            ajax.get("http://127.0.0.1:8080/api/stype/selectstypeAll").then(rs=>{
-              this.typeData = rs.data.data;
-              //先找到子节点的数据   this.types;
-              this.getChildrenType();
-              for (let i = 0; i <this.types.length ; i++) {
-                this.typeName = "";
-                this.chandleName(this.types[i]);
-                console.log(this.types);
-                var typeName1 = this.typeName.split("/").reverse().join("/");
-                debugger
-                this.types[i].name= typeName1.substr(0,typeName1.length-1);
-              }
-            });
-          },chandleName:function (node) {
-              if(node.pid != 0){
-                this.typeName+="/"+node.name;
-                for (let i = 0; i <this.typeData.length ; i++) {
-                  if(node.pid == this.typeData[i].id){
-                    this.chandleName(this.typeData[i]);
-                    break;
-                  }
+        },
+
+
+        queryType:function () {
+          ajax.get("http://127.0.0.1:8080/api/stype/selectstypeAll").then(rs=>{
+            this.typeData = rs.data.data;
+            //先找到子节点的数据   this.types;
+            this.getChildrenType();
+            for (let i = 0; i <this.types.length ; i++) {
+              this.typeName = "";
+              this.chandleName(this.types[i]);
+              console.log(this.types);
+              var typeName1 = this.typeName.split("/").reverse().join("/");
+              this.types[i].name= typeName1.substr(0,typeName1.length-1);
+            }
+          });
+        },chandleName:function (node) {
+            if(node.pid != 0){
+              this.typeName+="/"+node.name;
+              for (let i = 0; i <this.typeData.length ; i++) {
+                if(node.pid == this.typeData[i].id){
+                  this.chandleName(this.typeData[i]);
+                  break;
                 }
-              }else{
-                this.typeName+="/"+node.name;
               }
-          },getChildrenType:function () {
-            for (let i = 0; i <this.typeData.length ; i++) {
-              let  node=this.typeData[i];
-              this.isChildrenNode(node);
+            }else{
+              this.typeName+="/"+node.name;
             }
-          },isChildrenNode:function (node) {
-            let rs = true;
-            for (let i = 0; i <this.typeData.length ; i++) {
-              if(node.id == this.typeData[i].pid ){
-                rs = false;
-                break;
-              }
+        },getChildrenType:function () {
+          for (let i = 0; i <this.typeData.length ; i++) {
+            let  node=this.typeData[i];
+            this.isChildrenNode(node);
+          }
+        },isChildrenNode:function (node) {
+          let rs = true;
+          for (let i = 0; i <this.typeData.length ; i++) {
+            if(node.id == this.typeData[i].pid ){
+              rs = false;
+              break;
             }
-            if(rs==true){
-              this.types.push(node);
-            }
-          },toupdate:function (sx) {
+          }
+          if(rs==true){
+            this.types.push(node);
+          }
+        }
+
+
+
+        ,toupdate:function (sx) {
             this.updFormFlag = true;
             this.updForm = sx;
 
         },weihuvalue:function (row) {
             this.updForm = row;
             this.sxFormFlag = true;
-            debugger
             for (let i = 0; i <this.typeData.length ; i++) {
               if(row.typeid == this.typeData[i].id){
                 this.shuxingtitle = this.typeData[i].name+"信息维护";
@@ -457,7 +462,7 @@
         },toaddvalue:function () {
             this.addShuXing = true;
         },submitSx:function () {
-          this.addSx.attid=this.attid;
+          this.addSx.attid=this.updForm.id;
           this.$refs['addformshuxing'].validate((valid)=>{
             if(valid == true){
               ajax.post("http://127.0.0.1:8080/api/shuxingvalue/insertsxvalue",qs.stringify(this.addSx)).then(rs=>{

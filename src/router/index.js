@@ -34,6 +34,10 @@ export default new Router({
           path: '/Shixing',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Shixing.vue'),
           meta: { title: '属性管理' }
+        },{
+          path: '/Goods',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Goods.vue'),
+          meta: { title: '商品管理' }
         }
 
       ]

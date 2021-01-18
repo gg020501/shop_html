@@ -75,6 +75,9 @@ export default {
                   },{
                     index: 'Shixing',
                     title: '属性管理'
+                  },{
+                    index: 'Goods',
+                    title: '商品管理'
                   }
 
                 ]
