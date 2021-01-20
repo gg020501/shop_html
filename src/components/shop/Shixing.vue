@@ -16,13 +16,13 @@
         </el-table-column>
 
         <el-table-column
-          prop="name"
+          prop="namech"
           label="英文名"
           width="180">
         </el-table-column>
 
         <el-table-column
-          prop="namech"
+          prop="name"
           label="名称">
         </el-table-column>
 
@@ -104,13 +104,13 @@
       </el-table-column>
 
       <el-table-column
-        prop="name"
+        prop="namech"
         label="名称"
         width="180">
       </el-table-column>
 
       <el-table-column
-        prop="namech"
+        prop="name"
         label="英文名">
       </el-table-column>
 
@@ -147,11 +147,11 @@
 
       <el-form :model="addForm" :rules="addrules" ref="valueform" label-width="100px">
 
-        <el-form-item label="属性中文名" prop="name">
+        <el-form-item label="属性英文名" prop="name">
           <el-input v-model="addForm.name" autocomplete="off" ></el-input>
         </el-form-item>
 
-        <el-form-item label="属性英文名" prop="namech">
+        <el-form-item label="属性中文名" prop="namech">
           <el-input v-model="addForm.namech" autocomplete="off" ></el-input>
         </el-form-item>
 
@@ -473,6 +473,7 @@
                   });
                   this.addShuXing = false;
                   this.weihuvalue(this.updForm);
+                  this.addSx = {};
                 }
               })
             }
