@@ -47,16 +47,14 @@
         <div align="left">
           <el-form-item  label="主图" prop="imgpath">
               <el-upload
-                :limit="imgpath"
+                :limit="imgpathsl"
                 action="http://127.0.0.1:8080/api/pinpai/insertimgpath"
                 list-type="picture-card"
-                :on-preview="handlePictureCardPreview"
+                :on-success="handlePictureCardPreview"
                 :on-remove="handleRemove">
                 <i class="el-icon-plus"></i>
               </el-upload>
-            <el-dialog :visible.sync="dialogVisible">
               <img width="100%" :src="dialogImageUrl" >
-            </el-dialog>
           </el-form-item>
         </div>
 
@@ -133,7 +131,7 @@
                 width="180">
 
                 <template slot-scope="scope">
-                  <el-input/>
+                  <el-input v-model="scope.row.storcks"/>
                 </template>
 
               </el-table-column>
@@ -141,7 +139,7 @@
                 label="价格"
                 width="180">
                 <template slot-scope="scope">
-                  <el-input/>
+                  <el-input v-model="scope.row.pricess"/>
                 </template>
               </el-table-column>
             </el-table>
@@ -153,17 +151,17 @@
             <el-form-item v-for="a in  sxData" :key="a.id" :label="a.namech">
 
               <!--  3  输入框  -->
-              <el-input v-if="a.type==3" v-model="input"></el-input>
+              <el-input v-if="a.type==3" v-model="a.sxchecks"></el-input>
               <!--  0 下拉框  -->
-              <el-select v-if="a.type==0" v-model="select1" placeholder="请选择">
+              <el-select v-if="a.type==0" v-model="a.sxchecks" placeholder="请选择">
                 <el-option v-for="b in a.values" :key="b.id"  :label="b.name" value="b.id"></el-option>
               </el-select>
               <!--  1 单选框  -->
-              <el-radio-group v-if="a.type==1" v-model="radio" >
+              <el-radio-group v-if="a.type==1" v-model="a.sxchecks" >
                 <el-radio-button v-for="b in a.values" :key="b.id" :label="b.name"></el-radio-button>
               </el-radio-group>
               <!-- 2  复选框   -->
-              <el-checkbox-group v-model="check" v-if="a.type==2">
+              <el-checkbox-group v-model="a.sxchecks" v-if="a.type==2">
                 <el-checkbox-button v-for="b in a.values" :key="b.id" :label="b.name" name="type"></el-checkbox-button>
               </el-checkbox-group>
 
@@ -176,12 +174,10 @@
     </div>
 
 
-
-
-
     <div>
       <el-button style="margin-top: 12px;" v-if="active!=0" @click="nextx">上一步</el-button>
       <el-button style="margin-top: 12px;" v-if="active!=2" @click="next">下一步</el-button>
+      <el-button style="margin-top: 12px;" v-if="quedinganniu==1" @click="queding">提交</el-button>
       <el-button style="margin-top: 12px;" v-if="active==2" @click="submitnext">提交</el-button>
     </div>
 
@@ -197,9 +193,8 @@
       data() {
         return {
           //图片
-          imgpath:1,
+          imgpathsl:1,
           dialogImageUrl: '',
-          dialogVisible: false,
           checkTable :false,
           //迪卡内容
           tableData:[],
@@ -225,14 +220,17 @@
           typeData:[],
           typeName:'',
           //步骤条
+          quedinganniu:0,
           active: 0,
           active1:false,
           active2:false,
           active3:false,
-          productSaveForm:{
+
+           productSaveForm:{
             id:"",
             name:"",
             title:"",
+            typeid:"",
             bandid:"",
             imgpath:"",
             productdecs:"",
@@ -256,8 +254,6 @@
           ruleForm:{
             typeid:""
           }
-
-
         };
       },created:function(){
         this.active = 0;
@@ -266,28 +262,44 @@
       },methods: {
           //图片
         handleRemove(file, fileList) {
-          console.log(file, fileList);
+          console.log(file,fileList);
         },
         handlePictureCardPreview(file) {
             this.dialogImageUrl = file.url;
-            this.productSaveForm.imgpath = file.url;
-            this.dialogVisible = true;
+            this.productSaveForm.imgpath = file.data;
         },
         //监听下一页和上一页
         next:function() {
-           /*this.$refs['productsaveform'].validate((vd)=>{
+           this.$refs['productsaveform'].validate((vd)=>{
             if(vd == true){
-              }
-            })*/
               if (this.active++ > 3) this.active = 0;
+              }
+            })
         },nextx:function(){
           if (this.active-- < 2) this.active = 0;
         },submitnext:function () {
           alert("新增成功");
           this.active = 0;
-        }
-
-        ,queryType:function () {
+        },queding:function () {
+          this.productSaveForm.typeid = this.ruleForm.typeid;
+          let attrs = [];
+          for (let i = 0; i <this.sxData.length ; i++) {
+            let sxData = {};
+            sxData[this.sxData[i].name] = this.sxData[i].sxchecks;
+            attrs.push(sxData);
+          }
+          this.productSaveForm.attrs = JSON.stringify(attrs);
+          this.productSaveForm.sku = JSON.stringify(this.tableData);
+          ajax.post("http://127.0.0.1:8080/api/goods/insertattrssku",qs.stringify(this.productSaveForm)).then(rs=>{
+            if(rs.data.code == 200){
+              this.$message({
+                type: 'success',
+                message: '新增成功!'
+              });
+            }
+          })
+          console.log(this.tableData);
+        },queryType:function () {
           ajax.get("http://127.0.0.1:8080/api/stype/selectstypeAll").then(rs=>{
             this.typeData = rs.data.data;
             //先找到子节点的数据   this.types;
@@ -391,6 +403,7 @@
             }
 
             if( flag == true ){
+              this.quedinganniu = 1;
               //经过迪卡耳机加载的数据
               let datas = this.calcDescartes(dikaParams);
               for (let i = 0; i <datas.length ; i++) {
@@ -407,7 +420,6 @@
               }
             }
             console.log(this.tabletd);
-            //debugger;
             this.checkTable = flag;
 
           },calcDescartes:function(array) {
