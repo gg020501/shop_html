@@ -77,7 +77,10 @@ export default {
                     title: '属性管理'
                   },{
                     index: 'Goods',
-                    title: '商品管理'
+                    title: '商品添加'
+                  },{
+                    index: 'Goodssj',
+                    title: '商品信息'
                   }
 
                 ]

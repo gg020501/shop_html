@@ -37,7 +37,11 @@ export default new Router({
         },{
           path: '/Goods',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Goods.vue'),
-          meta: { title: '商品管理' }
+          meta: { title: '商品添加' }
+        },{
+          path: '/Goodssj',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Goodssj.vue'),
+          meta: { title: '商品信息' }
         }
 
       ]

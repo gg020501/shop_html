@@ -358,6 +358,7 @@
                   //判断是否为sku属性
                   if(sx[i].issku == 0 ){
                     if(sx[i].type!=3){
+                      sx[i].sxchecks = [];
                       //查找不是输入框的数据
                       ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
                         sx[i].values = rs.data;
@@ -409,11 +410,16 @@
               for (let i = 0; i <datas.length ; i++) {
                 //声明json串
                 let jsons = {};
-                //for循环将其放入json中
-                for (let j = 0; j <datas[i].length ; j++) {
-                  //获取name当表头放入json
-                  let dt = this.tabletd[j].name;
-                  jsons[dt] = datas[i][j];
+                if(typeof datas[i] == "object"){
+                  //for循环将其放入json中
+                  for (let j = 0; j <datas[i].length ; j++) {
+                    //获取name当表头放入json
+                    let dt = this.tabletd[j].name;
+                    jsons[dt] = datas[i][j];
+                  }
+                }else{
+                  let dt = this.tabletd[0].name;
+                  jsons[dt] = datas[i];
                 }
                 //放入
                 this.tableData.push(jsons);
