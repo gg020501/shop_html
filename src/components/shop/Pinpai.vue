@@ -196,7 +196,7 @@
                     type: 'success',
                     message: '删除成功!'
                   });
-                  this.$router.go(0)
+                  this.selectpinpaiAll();
                 }
               });
           },add:function () {
@@ -214,7 +214,7 @@
                     type: 'success',
                     message: '新增成功!'
                   });
-                  this.$router.go(0)
+                  this.selectpinpaiAll();
                 }
                 this.addFormFlag = false;
               })
@@ -235,7 +235,7 @@
                       type: 'success',
                       message: '修改成功!'
                     });
-                    this.$router.go(0)
+                    this.selectpinpaiAll();
                   }
                   this.updFormFlag = false;
                 })
