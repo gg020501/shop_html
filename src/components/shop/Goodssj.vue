@@ -41,7 +41,7 @@
           <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit"   @click="showupdate(scope.row)"></el-button>
             <el-button type="primary" icon="el-icon-delete"   @click="deleterow(scope.row.id)"></el-button>
-            <el-button type="success" @click="weihuvalue(scope.row.typeid,scope.row.id)">维护属性信息</el-button>
+            <el-button type="success" @click="weihuvalue(scope.row)">维护属性信息</el-button>
           </template>
         </el-table-column>
 
@@ -120,7 +120,7 @@
         <el-form  :model="ruleForm" label-width="180px">
 
             <el-form-item label="属性类型" prop="typeid">
-              <el-select v-model="ruleForm.typeid" placeholder="请选择活动区域" @change="selecttypebyid">
+              <el-select v-model="ruleForm.typeid" placeholder="请选择活动区域" @change="selecttypebyid1(ruleForm.typeid)">
                 <el-option
                   v-for="item in types"
                   :key="item.id"
@@ -327,11 +327,11 @@
                     this.selectgoodsj();
                   }
                 })
-            },weihuvalue:function (typeid,id) {
-                  this.queryType();
-                  this.ruleForm.typeid = typeid;
-                  this.selecttypebyid(typeid,id);
+            },weihuvalue:function (row) {
                   this.shangpinshuxing = true;
+                  this.ruleForm.typeid = row.typeid;
+                  this.queryType();
+                  this.selecttypebyid(row.typeid,row.id);
                   this.checkTablechange();
             },queryType:function () {
                 ajax.get("http://127.0.0.1:8080/api/stype/selectstypeAll").then(rs=>{
@@ -375,11 +375,55 @@
                     this.types.push(node);
                   }
                 },
+                  selecttypebyid1:function (typeid) {
+                    //每次选择时触发 将table设置为false隐藏
+                    this.checkTable = false;
+
+                    this.skuData = [];
+                    this.sxData = [];
+                    ajax.get("http://127.0.0.1:8080/api/shuxing/selecttypebyid?typeid="+typeid).then(rs=>{
+                      let sx = rs.data;
+                      if(sx.length > 0 ){
+                        for (let i = 0; i <sx.length ; i++) {
+                          //判断是否为sku属性
+                          if(sx[i].issku == 0 ){
+                            if(sx[i].type!=3){
+                              sx[i].sxchecks = [];
+                              //查找不是输入框的数据
+                              ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
+                                sx[i].values = rs.data;
+                                this.sxData.push(sx[i]);
+                              })
+                            }else{
+                              this.sxData.push(sx[i]);
+                            }
+                          }else{
+                            if(sx[i].type!=3){
+                              //查找不是输入框的数据
+                              ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
+                                sx[i].values = rs.data;
+                                sx[i].sxchecks = [];
+                                this.skuData.push(sx[i]);
+                              })
+                            }else{
+                              sx[i].sxchecks = [];
+                              this.skuData.push(sx[i]);
+                            }
+                          }
+                        }
+                      }else{
+                        this.skuData = [];
+                        this.sxData = [];
+                      }
+                    })
+                  }
+                ,
                 selecttypebyid:function (typeid,id) {
                   ajax.get("http://127.0.0.1:8080/api/goods/selectproductproid?id="+id).then(rs=>{
                     let datas = rs.data.data;
                     //每次选择时触发 将table设置为false隐藏
                     this.checkTable = false;
+
                     this.skuData = [];
                     this.sxData = [];
                     ajax.get("http://127.0.0.1:8080/api/shuxing/selecttypebyid?typeid="+typeid).then(rs=>{
@@ -447,11 +491,9 @@
                         if(arrValue.indexOf(objData[key])==-1){
                           arrValue.push(objData[key]);
                         }
-
                       }else{
                         return objData[key];
                       }
-
                     }
                   }
                   return arrValue;
@@ -460,8 +502,7 @@
                   this.tableData = [];
                   this.tabletd = [];
                   let dikaParams = [];
-
-                  console.log(this.skuData);
+                  //console.log(this.skuData);
                   let flag = true;
                   for (let i = 0; i <this.skuData.length ; i++) {
                     this.tabletd.push({"id":this.skuData[i].id,"namech":this.skuData[i].namech,"name":this.skuData[i].name});
@@ -471,7 +512,6 @@
                       break;
                     }
                   }
-
                   if( flag == true ){
                     this.quedinganniu = 1;
                     //经过迪卡耳机加载的数据
@@ -494,9 +534,7 @@
                       this.tableData.push(jsons);
                     }
                   }
-                  console.log(this.tabletd);
                   this.checkTable = flag;
-
                 },calcDescartes:function(array) {
                   if (array.length < 2) return array[0] || [];
                   return [].reduce.call(array, function (col, set) {
@@ -516,21 +554,7 @@
 
 
 
-
       }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     }
