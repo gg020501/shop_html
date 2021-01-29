@@ -200,6 +200,7 @@
                 }
               });
           },add:function () {
+              this.saveBandForm = {};
               this.addFormFlag = true;
           },imgCallBack:function (response, file) {
             debugger

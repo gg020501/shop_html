@@ -174,8 +174,8 @@
         </el-form-item>
 
         <el-form-item label="是否为SKU" prop="issku">
-          <el-radio v-model="addForm.issku" :label="0">是</el-radio>
-          <el-radio v-model="addForm.issku" :label="1">否</el-radio>
+          <el-radio v-model="addForm.issku" :label="1">是</el-radio>
+          <el-radio v-model="addForm.issku" :label="0">否</el-radio>
         </el-form-item>
 
       </el-form>
@@ -335,6 +335,7 @@
           this.queryType();
       },methods:{
         toadd:function() {
+          this.addForm = {};
           this.addFormFlag = true;
         },addShopData:function () {
             this.$refs['valueform'].validate((valib)=>{

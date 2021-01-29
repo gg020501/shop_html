@@ -99,13 +99,13 @@
             <el-form-item v-for="a in  skuData" :key="a.id" :label="a.namech">
 
               <!--  3  输入框  -->
-              <el-input v-if="a.type==3" v-model="a.sxchecks" ></el-input>
+              <el-input v-if="a.type==3" v-model="input"></el-input>
               <!--  0 下拉框  -->
-              <el-select v-if="a.type==0" v-model="a.sxchecks" placeholder="请选择">
+              <el-select v-if="a.type==0" v-model="select" placeholder="请选择">
                 <el-option v-for="b in a.values" :key="b.id"  :label="b.name" value="b.id"></el-option>
               </el-select>
               <!--  1 单选框  -->
-              <el-radio-group v-if="a.type==1" v-model="a.sxchecks" >
+              <el-radio-group v-if="a.type==1" v-model="radioplus" >
                 <el-radio-button  v-for="b in a.values" :key="b.id" :label="b.name"></el-radio-button>
               </el-radio-group>
               <!-- 2  复选框   -->
@@ -151,7 +151,7 @@
             <el-form-item v-for="a in  sxData" :key="a.id" :label="a.namech">
 
               <!--  3  输入框  -->
-              <el-input v-if="a.type==3" v-model="a.sxchecks" ></el-input>
+              <el-input v-if="a.type==3" v-model="a.sxchecks"></el-input>
               <!--  0 下拉框  -->
               <el-select v-if="a.type==0" v-model="a.sxchecks" placeholder="请选择">
                 <el-option v-for="b in a.values" :key="b.id"  :label="b.name" value="b.id"></el-option>
@@ -199,7 +199,10 @@
           tableData:[],
           //table头部
           tabletd :[],
-          //数据
+          //下拉框
+          select:"",
+          select1:"",
+
           skuData:[],
           sxData:[],
           //品牌
@@ -245,7 +248,7 @@
         };
       },created:function(){
         this.active = 0;
-
+        this.queryType();
         this.queryPinpai();
       },methods: {
           //图片
@@ -260,7 +263,6 @@
         next:function() {
            this.$refs['productsaveform'].validate((vd)=>{
             if(vd == true){
-              this.queryType();
               if (this.active++ > 2) this.active = 0;
               }
             })
@@ -337,26 +339,51 @@
         },selecttypebyid:function (typeid) {
             //每次选择时触发 将table设置为false隐藏
             this.checkTable = false;
-            ajax.get("http://127.0.0.1:8080/api/goods/queryAttrDataByTypeId?typeid="+typeid).then(rs=>{
-              //处理sku的
-              this.skuData = rs.data.skuData;
-              for (let i = 0; i <this.skuData.length ; i++) {
-                this.skuData[i].sxchecks = [];
-              }
 
-              //处理attr数据
-              this.sxData= rs.data.sxData;
-              for (let i = 0; i <this.sxData.length; i++) {
-                if(this.sxData[i].type == 2){
-                  this.sxData[i].sxchecks = [];
+            this.skuData = [];
+            this.sxData = [];
+            ajax.get("http://127.0.0.1:8080/api/shuxing/selecttypebyid?typeid="+typeid).then(rs=>{
+              let sx = rs.data;
+              if(sx.length > 0 ){
+                for (let i = 0; i <sx.length ; i++) {
+                  //判断是否为sku属性
+                  if(sx[i].issku == 0 ){
+                    if(sx[i].type!=3){
+                      sx[i].sxchecks = [];
+                      //查找不是输入框的数据
+                      ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
+                        sx[i].values = rs.data;
+                        this.sxData.push(sx[i]);
+                      })
+                    }else{
+                      this.sxData.push(sx[i]);
+                    }
+                  }else{
+                    if(sx[i].type!=3){
+                      //查找不是输入框的数据
+                      ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
+                        sx[i].values = rs.data;
+                        sx[i].sxchecks = [];
+                        this.skuData.push(sx[i]);
+                      })
+                    }else{
+                      sx[i].sxchecks = [];
+                      this.skuData.push(sx[i]);
+                    }
+                  }
                 }
+              }else{
+                this.skuData = [];
+                this.sxData = [];
               }
-
             })
           },checkTablechange:function () {
+
             this.tableData = [];
             this.tabletd = [];
             let dikaParams = [];
+
+            console.log(this.skuData);
             let flag = true;
             for (let i = 0; i <this.skuData.length ; i++) {
                   this.tabletd.push({"id":this.skuData[i].id,"namech":this.skuData[i].namech,"name":this.skuData[i].name});
@@ -388,6 +415,7 @@
                 this.tableData.push(jsons);
               }
             }
+            console.log(this.tabletd);
             this.checkTable = flag;
 
           },calcDescartes:function(array) {
@@ -404,6 +432,7 @@
             return res;
           });
         }
+
 
 
 

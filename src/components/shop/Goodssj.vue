@@ -97,9 +97,6 @@
         </div>
       </el-dialog>
 
-
-
-
       <!--分页插件-->
       <div class="block" align="center">
         <el-pagination
@@ -113,7 +110,6 @@
         >
         </el-pagination>
       </div>
-
 
       <!-- 填写商品属性 -->
       <el-dialog title="商品属性" :visible.sync="shangpinshuxing">
@@ -130,14 +126,14 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item v-if="skuData.length>0" label="商品规格" prop="name">
+            <el-form-item v-if="skuData.length>0" label="商品规格" >
               <el-form-item v-for="a in  skuData" :key="a.id" :label="a.namech">
 
                 <!--  3  输入框  -->
-                <el-input v-if="a.type==3" v-model="a.sxchecks"></el-input>
+                <el-input v-if="a.type==3" v-model="a.sxchecks" ></el-input>
                 <!--  0 下拉框  -->
                 <el-select v-if="a.type==0" v-model="a.sxchecks" placeholder="请选择">
-                  <el-option v-for="b in a.values" :key="b.id"  :label="b.name" value="b.id"></el-option>
+                  <el-option v-for="b in a.values" :key="b.id"  :label="b.name" :value="b.name"></el-option>
                 </el-select>
                 <!--  1 单选框  -->
                 <el-radio-group v-if="a.type==1" v-model="a.sxchecks" >
@@ -181,15 +177,14 @@
 
             </div>
 
-
-            <el-form-item v-if="sxData.length>0" label="商品参数" prop="name">
+            <el-form-item v-if="sxData.length>0" label="商品参数" >
               <el-form-item v-for="a in  sxData" :key="a.id" :label="a.namech">
 
                 <!--  3  输入框  -->
-                <el-input v-if="a.type==3" v-model="a.sxchecks"></el-input>
+                <el-input v-if="a.type==3" :v-model="a.sxchecks"></el-input>
                 <!--  0 下拉框  -->
                 <el-select v-if="a.type==0" v-model="a.sxchecks" placeholder="请选择">
-                  <el-option v-for="b in a.values" :key="b.id"  :label="b.name" value="b.id"></el-option>
+                  <el-option v-for="b in a.values" :key="b.id"  :label="b.name" :value="b.id"></el-option>
                 </el-select>
                 <!--  1 单选框  -->
                 <el-radio-group v-if="a.type==1" v-model="a.sxchecks" >
@@ -212,7 +207,6 @@
 
       </el-dialog>
 
-
     </div>
   </center>
 </template>
@@ -228,7 +222,8 @@
             skuData:[],
             //下拉框
             ruleForm:{
-              typeid:""
+              typeid:"",
+              id:""
             },
             //品牌数据
             types:[],
@@ -258,7 +253,6 @@
               start: 1,
               size: 3
             },
-
             //修改
             saveBandForm:{
               id:"",
@@ -270,13 +264,11 @@
               price:"",
               stocks:"",
             }
-
-
           }
         },created:function () {
             this.selectgoodsj();
             this.selectpinpai();
-
+            this.queryType();
         },methods:{
           sizeChange:function (size) {
             this.params.size = size;
@@ -286,7 +278,6 @@
             this.selectgoodsj();
           },selectgoodsj:function () {
             ajax.post("http://127.0.0.1:8080/api/goods/selectgoodsj",qs.stringify(this.params)).then(rs=>{
-              console.log(this.params);
               this.goodsData = rs.data.data;
               this.count = rs.data.count;
             });
@@ -330,8 +321,8 @@
             },weihuvalue:function (row) {
                   this.shangpinshuxing = true;
                   this.ruleForm.typeid = row.typeid;
-                  this.queryType();
-                  this.selecttypebyid(row.typeid,row.id);
+                  this.ruleForm.id = row.id;
+                  this.selecttypebyid();
                   this.checkTablechange();
             },queryType:function () {
                 ajax.get("http://127.0.0.1:8080/api/stype/selectstypeAll").then(rs=>{
@@ -341,7 +332,6 @@
                   for (let i = 0; i <this.types.length ; i++) {
                     this.typeName = "";
                     this.chandleName(this.types[i]);
-                    console.log(this.types);
                     var typeName1 = this.typeName.split("/").reverse().join("/");
                     this.types[i].name= typeName1.substr(0,typeName1.length-1);
                   }
@@ -375,58 +365,55 @@
                     this.types.push(node);
                   }
                 },
-                  selecttypebyid1:function (typeid) {
-                    //每次选择时触发 将table设置为false隐藏
-                    this.checkTable = false;
+                selecttypebyid1:function (typeid) {
+                  //每次选择时触发 将table设置为false隐藏
+                  this.checkTable = false;
 
-                    this.skuData = [];
-                    this.sxData = [];
-                    ajax.get("http://127.0.0.1:8080/api/shuxing/selecttypebyid?typeid="+typeid).then(rs=>{
-                      let sx = rs.data;
-                      if(sx.length > 0 ){
-                        for (let i = 0; i <sx.length ; i++) {
-                          //判断是否为sku属性
-                          if(sx[i].issku == 0 ){
-                            if(sx[i].type!=3){
-                              sx[i].sxchecks = [];
-                              //查找不是输入框的数据
-                              ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
-                                sx[i].values = rs.data;
-                                this.sxData.push(sx[i]);
-                              })
-                            }else{
+                  this.skuData = [];
+                  this.sxData = [];
+                  ajax.get("http://127.0.0.1:8080/api/shuxing/selecttypebyid?typeid="+typeid).then(rs=>{
+                    let sx = rs.data;
+                    if(sx.length > 0 ){
+                      for (let i = 0; i <sx.length ; i++) {
+                        //判断是否为sku属性
+                        if(sx[i].issku == 0 ){
+                          if(sx[i].type!=3){
+                            sx[i].sxchecks = [];
+                            //查找不是输入框的数据
+                            ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
+                              sx[i].values = rs.data;
                               this.sxData.push(sx[i]);
-                            }
+                            })
                           }else{
-                            if(sx[i].type!=3){
-                              //查找不是输入框的数据
-                              ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
-                                sx[i].values = rs.data;
-                                sx[i].sxchecks = [];
-                                this.skuData.push(sx[i]);
-                              })
-                            }else{
+                            this.sxData.push(sx[i]);
+                          }
+                        }else{
+                          if(sx[i].type!=3){
+                            //查找不是输入框的数据
+                            ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
+                              sx[i].values = rs.data;
                               sx[i].sxchecks = [];
                               this.skuData.push(sx[i]);
-                            }
+                            })
+                          }else{3
+                            sx[i].sxchecks = [];
+                            this.skuData.push(sx[i]);
                           }
                         }
-                      }else{
-                        this.skuData = [];
-                        this.sxData = [];
                       }
-                    })
-                  }
-                ,
-                selecttypebyid:function (typeid,id) {
-                  ajax.get("http://127.0.0.1:8080/api/goods/selectproductproid?id="+id).then(rs=>{
+                    }else{
+                      this.skuData = [];
+                      this.sxData = [];
+                    }
+                  })
+                },selecttypebyid:function () {
+                  ajax.get("http://127.0.0.1:8080/api/goods/selectproductproid?id="+this.ruleForm.id).then(rs=>{
                     let datas = rs.data.data;
                     //每次选择时触发 将table设置为false隐藏
                     this.checkTable = false;
-
                     this.skuData = [];
                     this.sxData = [];
-                    ajax.get("http://127.0.0.1:8080/api/shuxing/selecttypebyid?typeid="+typeid).then(rs=>{
+                    ajax.get("http://127.0.0.1:8080/api/shuxing/selecttypebyid?typeid="+this.ruleForm.typeid).then(rs=>{
                       let sx = rs.data;
                       if(sx.length > 0 ){
                         for (let i = 0; i <sx.length ; i++) {
@@ -438,7 +425,6 @@
                               }else{
                                 sx[i].sxchecks = this.getValeu(sx[i].name,datas);
                               }
-                              sx[i].sxchecks = [];
                               //查找不是输入框的数据
                               ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
                                 sx[i].values = rs.data;
@@ -458,6 +444,7 @@
                               //查找不是输入框的数据
                               ajax.get("http://127.0.0.1:8080/api/shuxingvalue/selectsxvalueattid?id="+sx[i].id).then(rs=>{
                                 sx[i].values = rs.data;
+                                debugger
                                 sx[i].sxchecks = this.getValeu(sx[i].name,datas);
                                 this.skuData.push(sx[i]);
                               })
@@ -472,14 +459,12 @@
                         this.sxData = [];
                       }
                     })
-
-
                   })
+                  console.log(this.skuData);
+                  console.log(this.sxData);
                 },
-
                 getValeu:function(key,data){
                   let  arrValue=[];
-                  debugger;
                   //遍历当前商品对应的所有的属性
                   for (let i = 0; i <data.length ; i++) {
                     //得到当前属性数据的一个 将字符串转为json
@@ -502,7 +487,6 @@
                   this.tableData = [];
                   this.tabletd = [];
                   let dikaParams = [];
-                  //console.log(this.skuData);
                   let flag = true;
                   for (let i = 0; i <this.skuData.length ; i++) {
                     this.tabletd.push({"id":this.skuData[i].id,"namech":this.skuData[i].namech,"name":this.skuData[i].name});
@@ -551,15 +535,8 @@
                 }
 
 
-
-
-
       }
-
-
     }
 </script>
-
 <style scoped>
-
 </style>
